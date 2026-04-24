@@ -2,19 +2,16 @@ import type { z } from "zod";
 import {
   getResumePacketInput,
   truncatePacket,
-  type Decision,
-  type Event,
   type FeatureCard,
   type ResumePacket,
 } from "@baton/shared";
 import { k } from "../redis/keys.js";
+import { loadRecentDecisions } from "../redis/queries.js";
 import { notFound, type ToolHandler } from "./types.js";
 
 type Input = z.infer<typeof getResumePacketInput>;
 type Output = ResumePacket;
 
-/** How many events to scan backwards when fishing for recent decisions. */
-const DECISION_SCAN_COUNT = 40;
 /** How many decisions to include in the packet. */
 const DECISION_KEEP = 3;
 
@@ -46,6 +43,7 @@ export const getResumePacket: ToolHandler<Input, Output> = async (
     redis,
     input.room_id,
     input.feature_id,
+    DECISION_KEEP,
   );
 
   const checkpoint =
@@ -70,37 +68,6 @@ export const getResumePacket: ToolHandler<Input, Output> = async (
 
   return truncatePacket(packet);
 };
-
-async function loadRecentDecisions(
-  redis: import("../redis/client.js").BatonRedis,
-  roomId: string,
-  featureId: string,
-): Promise<Decision[]> {
-  // XREVRANGE returns newest first.
-  const entries = await redis.xRevRange(
-    k.events(roomId, featureId),
-    "+",
-    "-",
-    { COUNT: DECISION_SCAN_COUNT },
-  );
-
-  const decisions: Decision[] = [];
-  for (const entry of entries) {
-    if (decisions.length >= DECISION_KEEP) break;
-    const raw = entry.message["data"];
-    if (typeof raw !== "string") continue;
-    let parsed: Event;
-    try {
-      parsed = JSON.parse(raw) as Event;
-    } catch {
-      continue;
-    }
-    if (parsed.type !== "decision.made") continue;
-    const text = (parsed.payload["text"] ?? "") as string;
-    decisions.push({ event_id: parsed.event_id, text, ts: parsed.ts });
-  }
-  return decisions;
-}
 
 function mergeBlockers(
   fromCard: readonly string[],

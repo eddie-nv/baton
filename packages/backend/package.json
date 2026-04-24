@@ -15,7 +15,7 @@
   "dependencies": {
     "@baton/shared": "*",
     "@hono/node-server": "^1.11.0",
-    "hono": "^4.4.0",
+    "hono": "^4.12.15",
     "js-tiktoken": "^1.0.12",
     "nanoid": "^5.0.7",
     "redis": "^4.6.13",
