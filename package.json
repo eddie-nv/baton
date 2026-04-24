@@ -8,7 +8,11 @@
   ],
   "scripts": {
     "build": "tsc -b packages/shared packages/backend packages/mcp-shim",
-    "clean": "tsc -b --clean packages/shared packages/backend packages/mcp-shim && rm -rf packages/*/dist",
+    "build:web": "npm run build --workspace @baton/web",
+    "build:all": "npm run build && npm run build:web",
+    "clean": "tsc -b --clean packages/shared packages/backend packages/mcp-shim && rm -rf packages/*/dist packages/backend/public",
+    "dev:web": "npm run dev --workspace @baton/web",
+    "typecheck:web": "npm run typecheck --workspace @baton/web",
     "test": "npm run test --workspaces --if-present",
     "dev:backend": "npm run dev --workspace @baton/backend",
     "verify": "tsx scripts/verify.ts",

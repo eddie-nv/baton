@@ -10,3 +10,6 @@ coverage/
 
 # Redis data volume
 deploy/data/
+
+# Vite build output (Vite drops it into packages/backend/public)
+packages/backend/public/
