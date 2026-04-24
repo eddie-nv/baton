@@ -1,0 +1,21 @@
+services:
+  redis:
+    image: redis/redis-stack-server:7.4.0-v0
+    container_name: baton-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+    command: >-
+      redis-stack-server
+      --appendonly yes
+      --save "60 1000"
+      --dir /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # backend service added in M7 (deploy milestone).

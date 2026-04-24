@@ -1,0 +1,23 @@
+{
+  "name": "baton",
+  "version": "0.1.0",
+  "private": true,
+  "description": "State fabric for coding agents — no cold boot on branch switch.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc -b packages/shared packages/backend packages/mcp-shim",
+    "clean": "tsc -b --clean packages/shared packages/backend packages/mcp-shim && rm -rf packages/*/dist",
+    "test": "npm run test --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace @baton/backend"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

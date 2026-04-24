@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "payload=$(cat); file=$(printf '%s' \"$payload\" | jq -r '.tool_input.file_path // empty'); case \"$file\" in *packages/*.ts) (cd \"${CLAUDE_PROJECT_DIR:-.}\" && npx --no-install tsc --noEmit -p tsconfig.base.json) ;; *) exit 0 ;; esac"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "payload=$(cat); cmd=$(printf '%s' \"$payload\" | jq -r '.tool_input.command // empty'); if printf '%s' \"$cmd\" | grep -Eq 'git[[:space:]]+reset[[:space:]]+--hard|git[[:space:]]+push[[:space:]]+(--force|-f)|git[[:space:]]+branch[[:space:]]+-D'; then printf 'Destructive git command blocked. Confirm with the user before retrying: %s\\n' \"$cmd\" >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s\\n' 'Reminder: consider running /verify before committing.'"
+          }
+        ]
+      }
+    ]
+  }
+}
