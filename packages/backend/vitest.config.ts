@@ -3,6 +3,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
+    // Integration tests share a real Redis. Serialize file execution so
+    // one suite's flushDb() cannot wipe another suite's setup.
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
