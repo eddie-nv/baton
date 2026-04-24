@@ -75,16 +75,21 @@ export function RoomDetail(): JSX.Element {
 
   if (status.kind === "loading") {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <p className="text-sm text-ink-500">Loading room…</p>
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        <p className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+          loading room…
+        </p>
       </div>
     );
   }
   if (status.kind === "error") {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <Link to="/dashboard" className="text-sm text-accent hover:underline">
-          ← back to dashboard
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        <Link
+          to="/dashboard"
+          className="font-mono text-2xs uppercase tracking-widest text-ink-300 hover:text-signal transition"
+        >
+          ← dashboard
         </Link>
         <div className="mt-4">
           <EmptyState title="Failed to load room" description={status.message} />
@@ -97,22 +102,32 @@ export function RoomDetail(): JSX.Element {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 space-y-6">
-      <div>
-        <Link to="/dashboard" className="text-sm text-accent hover:underline">
-          ← back to dashboard
-        </Link>
-      </div>
+      <Link
+        to="/dashboard"
+        className="font-mono text-2xs uppercase tracking-widest text-ink-300 hover:text-signal transition"
+      >
+        ← dashboard
+      </Link>
 
-      <header className="card">
-        <h1 className="text-2xl font-bold tracking-tight">{room.title}</h1>
-        <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          <Field label="room_id" value={room.room_id} mono />
-          <Field label="project_id" value={room.project_id} mono />
+      <header className="border-b border-edge pb-6">
+        <p className="font-mono text-2xs uppercase tracking-widest text-signal">
+          {room.project_id}
+        </p>
+        <h1 className="mt-1 text-3xl md:text-4xl font-bold tracking-tightest">
+          {room.title}
+        </h1>
+        <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-edge border border-edge">
+          <Field label="room_id" value={room.room_id} />
           <Field
             label="created"
-            value={`${formatDate(room.created_at)} (${relativeTime(room.created_at)})`}
+            value={relativeTime(room.created_at)}
+            tooltip={formatDate(room.created_at)}
           />
           <Field label="features" value={`${features.length}`} />
+          <Field
+            label="status"
+            value={features.length > 0 ? "active" : "empty"}
+          />
         </dl>
       </header>
 
@@ -122,11 +137,11 @@ export function RoomDetail(): JSX.Element {
           description="A feature exists once you fire an event for it (e.g. action.branch)."
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-          <aside>
-            <h2 className="text-xs uppercase tracking-wide text-ink-500 mb-2">
-              Features
-            </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6">
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <p className="font-mono text-2xs uppercase tracking-widest text-signal mb-3">
+              features ({features.length})
+            </p>
             <FeatureList
               features={features}
               selectedFeatureId={selectedFeature?.feature_id ?? null}
@@ -139,7 +154,7 @@ export function RoomDetail(): JSX.Element {
           </aside>
 
           {selectedFeature !== null ? (
-            <div className="space-y-6 min-w-0">
+            <div className="space-y-5 min-w-0">
               <FeatureCardView card={selectedFeature} />
               <ResumePacketView
                 roomId={room.room_id}
@@ -164,15 +179,18 @@ export function RoomDetail(): JSX.Element {
 interface FieldProps {
   label: string;
   value: string;
-  mono?: boolean;
+  tooltip?: string;
 }
 
-function Field({ label, value, mono }: FieldProps): JSX.Element {
+function Field({ label, value, tooltip }: FieldProps): JSX.Element {
   return (
-    <div>
-      <dt className="text-xs uppercase tracking-wide text-ink-500">{label}</dt>
+    <div className="bg-canvas-raised px-4 py-3">
+      <dt className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+        {label}
+      </dt>
       <dd
-        className={`mt-0.5 ${mono === true ? "font-mono text-xs break-all" : "text-sm"} text-ink-900`}
+        className="mt-1 font-mono text-xs text-ink-50 break-all"
+        title={tooltip}
       >
         {value}
       </dd>

@@ -21,25 +21,29 @@ export function FeatureList({
             <button
               type="button"
               onClick={() => onSelect(f.feature_id)}
-              className={`w-full text-left card transition ${
+              className={`w-full text-left card-tight transition ${
                 active
-                  ? "border-accent ring-2 ring-accent/20"
-                  : "hover:border-ink-300"
+                  ? "border-signal/60 bg-signal/[0.04]"
+                  : "hover:border-edge-strong"
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="font-mono text-sm text-ink-900 truncate">
+                  <p
+                    className={`font-mono text-xs truncate ${
+                      active ? "text-signal" : "text-ink-50"
+                    }`}
+                  >
                     {f.feature_id}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-500 truncate">
-                    {f.git.branch || "(no branch yet)"}
+                  <p className="mt-0.5 font-mono text-2xs text-ink-500 truncate">
+                    {f.git.branch || "—"}
                   </p>
                 </div>
                 <Badge tone={f.state}>{f.state.replace("_", " ")}</Badge>
               </div>
               {f.purpose !== "" ? (
-                <p className="mt-2 text-xs text-ink-500 line-clamp-2">
+                <p className="mt-2 text-xs text-ink-300 line-clamp-2">
                   {f.purpose}
                 </p>
               ) : null}

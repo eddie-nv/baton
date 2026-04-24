@@ -11,21 +11,28 @@ export function FeatureCardView({ card }: FeatureCardViewProps): JSX.Element {
   const overBudget = tokens > CARD_BUDGET;
 
   return (
-    <section className="card space-y-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs text-ink-500">{card.feature_id}</p>
-          <h3 className="mt-1 text-lg font-semibold text-ink-900">
-            {card.purpose || "(no purpose set)"}
+    <section className="card space-y-5">
+      <header className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-edge">
+        <div className="min-w-0">
+          <p className="font-mono text-2xs uppercase tracking-widest text-signal">
+            feature_card
+          </p>
+          <p className="mt-1 font-mono text-xs text-ink-300 break-all">
+            {card.feature_id}
+          </p>
+          <h3 className="mt-2 text-lg font-semibold text-ink-50 leading-snug">
+            {card.purpose || (
+              <span className="text-ink-500 italic">no purpose set</span>
+            )}
           </h3>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Badge tone={card.state}>{card.state.replace("_", " ")}</Badge>
           <span
-            className={`pill ${
+            className={`pill border ${
               overBudget
-                ? "bg-rose-50 text-rose-900 border border-rose-200"
-                : "bg-ink-100 text-ink-700 border border-ink-200"
+                ? "border-evt-error/40 bg-evt-error/10 text-evt-error"
+                : "border-edge text-ink-300"
             }`}
             title={`approximate token count ${tokens} of ${CARD_BUDGET} budget (server enforces exactly with js-tiktoken)`}
           >
@@ -35,15 +42,14 @@ export function FeatureCardView({ card }: FeatureCardViewProps): JSX.Element {
       </header>
 
       <Section label="git">
-        <KV k="branch" v={card.git.branch || "—"} mono />
-        <KV k="parent" v={card.git.parent_branch || "—"} mono />
+        <KV k="branch" v={card.git.branch || "—"} />
+        <KV k="parent" v={card.git.parent_branch || "—"} />
         <KV
           k="head"
-          v={`${card.git.head_sha || "—"} (${card.git.commits_ahead} ahead)`}
-          mono
+          v={`${card.git.head_sha || "—"} · ${card.git.commits_ahead} ahead`}
         />
         {card.git.dirty_files.length > 0 ? (
-          <KV k="dirty" v={card.git.dirty_files.join(", ")} mono />
+          <KV k="dirty" v={card.git.dirty_files.join(", ")} />
         ) : null}
       </Section>
 
@@ -51,7 +57,6 @@ export function FeatureCardView({ card }: FeatureCardViewProps): JSX.Element {
         <KV
           k="files"
           v={card.surface.files.length === 0 ? "—" : card.surface.files.join(", ")}
-          mono
         />
         <KV
           k="services"
@@ -60,39 +65,31 @@ export function FeatureCardView({ card }: FeatureCardViewProps): JSX.Element {
               ? "—"
               : card.surface.services.join(", ")
           }
-          mono
         />
       </Section>
 
       {card.invariants.length > 0 ? (
         <Section label="invariants">
-          <ul className="list-disc pl-5 text-sm text-ink-700 space-y-1">
-            {card.invariants.map((inv, i) => (
-              <li key={i}>{inv}</li>
-            ))}
-          </ul>
+          <BulletList items={card.invariants} />
         </Section>
       ) : null}
 
       {card.hypotheses.length > 0 ? (
         <Section label={`hypotheses (${card.hypotheses.length}/3)`}>
-          <ul className="list-disc pl-5 text-sm text-ink-700 space-y-1">
-            {card.hypotheses.map((h, i) => (
-              <li key={i}>{h}</li>
-            ))}
-          </ul>
+          <BulletList items={card.hypotheses} tone="hypothesis" />
         </Section>
       ) : null}
 
       {card.failed_attempts.length > 0 ? (
         <Section label={`failed attempts (${card.failed_attempts.length})`}>
-          <ul className="space-y-1.5 text-sm text-ink-700">
+          <ul className="space-y-1.5">
             {card.failed_attempts.map((a) => (
-              <li key={a.signature}>
-                <span className="font-mono text-xs text-ink-500">
-                  {a.signature}
-                </span>{" "}
-                — {a.summary}
+              <li
+                key={a.signature}
+                className="grid grid-cols-[160px_1fr] gap-3 items-baseline font-mono text-xs"
+              >
+                <span className="text-evt-error truncate">{a.signature}</span>
+                <span className="text-ink-300">{a.summary}</span>
               </li>
             ))}
           </ul>
@@ -101,19 +98,13 @@ export function FeatureCardView({ card }: FeatureCardViewProps): JSX.Element {
 
       {card.open_blockers.length > 0 ? (
         <Section label="open blockers">
-          <ul className="list-disc pl-5 text-sm text-ink-700 space-y-1">
-            {card.open_blockers.map((b, i) => (
-              <li key={i}>{b}</li>
-            ))}
-          </ul>
+          <BulletList items={card.open_blockers} tone="error" />
         </Section>
       ) : null}
 
       <Section label="next action">
-        <p className="text-sm text-ink-900">
-          {card.next_action || (
-            <span className="text-ink-500">(none)</span>
-          )}
+        <p className="text-sm text-ink-50">
+          {card.next_action || <span className="text-ink-500 italic">none</span>}
         </p>
       </Section>
     </section>
@@ -127,7 +118,7 @@ interface SectionProps {
 function Section({ label, children }: SectionProps): JSX.Element {
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-ink-500 mb-1.5">
+      <p className="font-mono text-2xs uppercase tracking-widest text-signal mb-2">
         {label}
       </p>
       <div className="space-y-1">{children}</div>
@@ -138,15 +129,35 @@ function Section({ label, children }: SectionProps): JSX.Element {
 interface KVProps {
   k: string;
   v: string;
-  mono?: boolean;
 }
-function KV({ k, v, mono }: KVProps): JSX.Element {
+function KV({ k, v }: KVProps): JSX.Element {
   return (
-    <p className="text-sm">
-      <span className="text-ink-500">{k}: </span>
-      <span className={mono === true ? "font-mono text-ink-900" : "text-ink-900"}>
-        {v}
-      </span>
+    <p className="grid grid-cols-[100px_1fr] gap-3 items-baseline font-mono text-xs">
+      <span className="text-ink-500">{k}</span>
+      <span className="text-ink-50 break-all">{v}</span>
     </p>
+  );
+}
+
+interface BulletListProps {
+  items: string[];
+  tone?: "default" | "hypothesis" | "error";
+}
+function BulletList({ items, tone = "default" }: BulletListProps): JSX.Element {
+  const dotTone =
+    tone === "hypothesis"
+      ? "text-evt-hypothesis"
+      : tone === "error"
+        ? "text-evt-error"
+        : "text-signal";
+  return (
+    <ul className="space-y-1 text-sm text-ink-100">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-2">
+          <span className={`${dotTone} font-mono select-none`}>●</span>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

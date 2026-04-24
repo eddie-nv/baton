@@ -10,14 +10,14 @@ interface EventTimelineProps {
 const PAGE_SIZE = 50;
 
 const EVENT_TONE: Record<string, string> = {
-  "action.branch": "bg-sky-50 text-sky-900 border-sky-200",
-  "action.edit": "bg-ink-100 text-ink-700 border-ink-200",
-  "action.commit": "bg-emerald-50 text-emerald-900 border-emerald-200",
-  "error.test": "bg-rose-50 text-rose-900 border-rose-200",
-  "hypothesis.raised": "bg-violet-50 text-violet-900 border-violet-200",
-  "decision.made": "bg-amber-50 text-amber-900 border-amber-200",
-  "session.pause": "bg-ink-100 text-ink-500 border-ink-200",
-  "feature.merged": "bg-emerald-50 text-emerald-900 border-emerald-200",
+  "action.branch": "text-evt-branch",
+  "action.edit": "text-evt-edit",
+  "action.commit": "text-evt-commit",
+  "error.test": "text-evt-error",
+  "hypothesis.raised": "text-evt-hypothesis",
+  "decision.made": "text-evt-decision",
+  "session.pause": "text-evt-pause",
+  "feature.merged": "text-evt-merged",
 };
 
 export function EventTimeline({
@@ -64,43 +64,53 @@ export function EventTimeline({
 
   return (
     <section className="card">
-      <header className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Event timeline</h3>
-        <span className="text-xs font-mono text-ink-500">
-          {events.length} loaded{cursor !== null ? " · more available" : ""}
+      <header className="flex items-center justify-between mb-4 pb-3 border-b border-edge">
+        <div>
+          <p className="font-mono text-2xs uppercase tracking-widest text-signal">
+            event_ledger
+          </p>
+          <p className="mt-0.5 text-xs text-ink-500">
+            redis stream · oldest first · cursor paginated
+          </p>
+        </div>
+        <span className="pill-bordered">
+          {events.length} loaded{cursor !== null ? " · more →" : ""}
         </span>
       </header>
 
       {error !== null ? (
-        <p className="text-sm text-rose-700">Failed: {error}</p>
+        <p className="font-mono text-xs text-evt-error">↳ failed: {error}</p>
       ) : null}
 
       {events.length === 0 && !loading ? (
-        <p className="text-sm text-ink-500">No events for this feature.</p>
+        <p className="text-sm text-ink-500 italic">
+          no events for this feature
+        </p>
       ) : (
-        <ol className="space-y-2.5">
+        <ol className="space-y-1.5">
           {events.map((evt) => (
             <li
               key={evt.event_id}
-              className="grid grid-cols-[140px_1fr] gap-3 items-start"
+              className="grid grid-cols-[64px_150px_1fr] gap-3 items-baseline font-mono text-xs hover:bg-canvas-inset px-2 -mx-2 py-1 rounded transition"
             >
               <span
-                className={`pill border ${
-                  EVENT_TONE[evt.type] ?? "bg-ink-100 text-ink-700 border-ink-200"
-                } font-mono text-[11px] truncate`}
+                className="text-ink-500 tabular-nums"
+                title={formatDate(evt.ts)}
+              >
+                {formatTime(evt.ts)}
+              </span>
+              <span
+                className={`${EVENT_TONE[evt.type] ?? "text-ink-500"} truncate`}
                 title={evt.type}
               >
                 {evt.type}
               </span>
-              <div className="min-w-0">
-                <p className="text-sm text-ink-900 break-words">
-                  {summarize(evt)}
-                </p>
-                <p className="mt-0.5 font-mono text-[11px] text-ink-500">
-                  {evt.event_id} · {evt.actor_id} · {relativeTime(evt.ts)} ·{" "}
-                  <span title={formatDate(evt.ts)}>{formatDate(evt.ts)}</span>
-                </p>
-              </div>
+              <span className="text-ink-100 break-words leading-relaxed">
+                {summarize(evt)}
+                <span className="ml-2 text-ink-500 text-2xs">
+                  · {evt.actor_id} · {relativeTime(evt.ts)}
+                </span>
+              </span>
             </li>
           ))}
         </ol>
@@ -112,16 +122,23 @@ export function EventTimeline({
             type="button"
             disabled={loading}
             onClick={() => void loadPage(cursor)}
-            className="btn-ghost"
+            className="btn-ghost disabled:opacity-50"
           >
-            {loading ? "Loading…" : "Load older"}
+            {loading ? "loading…" : "load older →"}
           </button>
         ) : loading && events.length === 0 ? (
-          <p className="text-xs text-ink-500">Loading…</p>
+          <p className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+            loading…
+          </p>
         ) : null}
       </div>
     </section>
   );
+}
+
+function formatTime(ts: number): string {
+  const d = new Date(ts);
+  return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`;
 }
 
 function summarize(evt: EventRow): string {

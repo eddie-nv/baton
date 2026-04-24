@@ -44,17 +44,26 @@ export function ResumePacketView({
 
   return (
     <section className="card">
-      <header className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Resume packet</h3>
-        {status.kind === "ok" ? (
-          <Tokens packet={status.packet} />
-        ) : null}
+      <header className="flex items-center justify-between mb-4 pb-3 border-b border-edge">
+        <div>
+          <p className="font-mono text-2xs uppercase tracking-widest text-signal">
+            resume_packet
+          </p>
+          <p className="mt-0.5 text-xs text-ink-500">
+            what the next agent reads at session-start
+          </p>
+        </div>
+        {status.kind === "ok" ? <Tokens packet={status.packet} /> : null}
       </header>
 
       {status.kind === "loading" ? (
-        <p className="text-sm text-ink-500">Loading…</p>
+        <p className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+          loading…
+        </p>
       ) : status.kind === "error" ? (
-        <p className="text-sm text-rose-700">Failed: {status.message}</p>
+        <p className="font-mono text-xs text-evt-error">
+          ↳ failed: {status.message}
+        </p>
       ) : (
         <PacketBody packet={status.packet} />
       )}
@@ -67,10 +76,10 @@ function Tokens({ packet }: { packet: ResumePacket }): JSX.Element {
   const over = tokens > PACKET_BUDGET;
   return (
     <span
-      className={`pill ${
+      className={`pill border ${
         over
-          ? "bg-rose-50 text-rose-900 border border-rose-200"
-          : "bg-ink-100 text-ink-700 border border-ink-200"
+          ? "border-evt-error/40 bg-evt-error/10 text-evt-error"
+          : "border-edge text-ink-300"
       }`}
       title={`approximate token count ${tokens} of ${PACKET_BUDGET} budget (server enforces exactly)`}
     >
@@ -81,30 +90,33 @@ function Tokens({ packet }: { packet: ResumePacket }): JSX.Element {
 
 function PacketBody({ packet }: { packet: ResumePacket }): JSX.Element {
   return (
-    <div className="space-y-4 text-sm">
+    <div className="space-y-5">
       <div>
-        <p className="text-xs uppercase tracking-wide text-ink-500 mb-1">
+        <p className="font-mono text-2xs uppercase tracking-widest text-signal mb-1.5">
           next action
         </p>
-        <p className="text-ink-900">
+        <p className="text-sm text-ink-50">
           {packet.next_action || (
-            <span className="text-ink-500">(none)</span>
+            <span className="text-ink-500 italic">none</span>
           )}
         </p>
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-wide text-ink-500 mb-1">
+        <p className="font-mono text-2xs uppercase tracking-widest text-signal mb-1.5">
           last decisions ({packet.last_decisions.length}/3)
         </p>
         {packet.last_decisions.length === 0 ? (
-          <p className="text-ink-500 text-sm">(none)</p>
+          <p className="text-sm text-ink-500 italic">none</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {packet.last_decisions.map((d) => (
-              <li key={d.event_id} className="border-l-2 border-ink-200 pl-3">
-                <p className="text-ink-900">{d.text}</p>
-                <p className="font-mono text-[11px] text-ink-500">
+              <li
+                key={d.event_id}
+                className="border-l-2 border-evt-decision/60 pl-3"
+              >
+                <p className="text-sm text-ink-50">{d.text}</p>
+                <p className="mt-0.5 font-mono text-2xs uppercase tracking-widest text-ink-500">
                   {d.event_id} · {formatDate(d.ts)}
                 </p>
               </li>
@@ -115,12 +127,15 @@ function PacketBody({ packet }: { packet: ResumePacket }): JSX.Element {
 
       {packet.open_blockers.length > 0 ? (
         <div>
-          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1">
+          <p className="font-mono text-2xs uppercase tracking-widest text-signal mb-1.5">
             open blockers
           </p>
-          <ul className="list-disc pl-5 text-ink-700 space-y-1">
+          <ul className="space-y-1 text-sm text-ink-100">
             {packet.open_blockers.map((b, i) => (
-              <li key={i}>{b}</li>
+              <li key={i} className="flex gap-2">
+                <span className="text-evt-error font-mono select-none">●</span>
+                <span>{b}</span>
+              </li>
             ))}
           </ul>
         </div>

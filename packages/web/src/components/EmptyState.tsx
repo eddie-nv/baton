@@ -10,13 +10,15 @@ export function EmptyState({
   hint,
 }: EmptyStateProps): JSX.Element {
   return (
-    <div className="rounded-lg border border-dashed border-ink-200 bg-white px-6 py-10 text-center">
-      <p className="text-sm font-medium text-ink-900">{title}</p>
+    <div className="rounded-md border border-dashed border-edge bg-canvas-raised px-6 py-10 text-center">
+      <p className="font-mono text-2xs uppercase tracking-widest text-ink-50">
+        {title}
+      </p>
       {description !== undefined ? (
-        <p className="mt-1 text-sm text-ink-500">{description}</p>
+        <p className="mt-2 text-sm text-ink-300">{description}</p>
       ) : null}
       {hint !== undefined ? (
-        <p className="mt-3 font-mono text-xs text-ink-500">{hint}</p>
+        <p className="mt-3 font-mono text-xs text-signal">{hint}</p>
       ) : null}
     </div>
   );

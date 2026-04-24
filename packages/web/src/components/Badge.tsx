@@ -3,11 +3,11 @@ import type { JSX } from "react";
 type Tone = "in_progress" | "blocked" | "merged" | "abandoned" | "neutral";
 
 const TONES: Record<Tone, string> = {
-  in_progress: "bg-amber-50 text-amber-900 border border-amber-200",
-  blocked: "bg-rose-50 text-rose-900 border border-rose-200",
-  merged: "bg-emerald-50 text-emerald-900 border border-emerald-200",
-  abandoned: "bg-ink-100 text-ink-500 border border-ink-200",
-  neutral: "bg-ink-100 text-ink-700 border border-ink-200",
+  in_progress: "border-evt-decision/40 bg-evt-decision/10 text-evt-decision",
+  blocked: "border-evt-error/40 bg-evt-error/10 text-evt-error",
+  merged: "border-evt-merged/40 bg-evt-merged/10 text-evt-merged",
+  abandoned: "border-edge text-ink-500",
+  neutral: "border-edge text-ink-300",
 };
 
 interface BadgeProps {
@@ -16,5 +16,5 @@ interface BadgeProps {
 }
 
 export function Badge({ tone = "neutral", children }: BadgeProps): JSX.Element {
-  return <span className={`pill ${TONES[tone]}`}>{children}</span>;
+  return <span className={`pill border ${TONES[tone]}`}>{children}</span>;
 }

@@ -2,39 +2,57 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 
 export function Layout(): JSX.Element {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-ink-200 bg-white">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-2xl font-bold tracking-tight text-ink-900 group-hover:text-accent transition">
+    <div className="min-h-screen flex flex-col bg-canvas">
+      <StatusStrip />
+      <header className="border-b border-edge bg-canvas/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-3">
+          <Link to="/" className="flex items-baseline gap-3 group">
+            <span className="font-mono text-base font-semibold text-ink-50 tracking-tight group-hover:text-signal transition">
               baton
             </span>
-            <span className="hidden sm:inline text-xs font-mono text-ink-500">
+            <span className="hidden sm:inline font-mono text-2xs uppercase tracking-widest text-ink-500">
               state fabric for coding agents
             </span>
           </Link>
           <nav className="flex items-center gap-1">
-            <NavItem to="/" end>Home</NavItem>
-            <NavItem to="/dashboard">Dashboard</NavItem>
+            <NavItem to="/" end={true}>Home</NavItem>
+            <NavItem to="/dashboard" end={false}>Dashboard →</NavItem>
           </nav>
         </div>
       </header>
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-ink-200 bg-white">
-        <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4 text-xs text-ink-500">
-          <span>baton — git moves your code, baton passes the why</span>
+      <footer className="border-t border-edge mt-16">
+        <div className="mx-auto max-w-6xl flex flex-wrap items-center justify-between gap-3 px-6 py-5 font-mono text-2xs uppercase tracking-widest text-ink-500">
+          <span>baton — git moves code, baton moves working state</span>
           <a
             href="https://github.com/eddie-nv/baton"
-            className="hover:text-ink-900 transition"
+            className="hover:text-signal transition"
             target="_blank"
             rel="noreferrer"
           >
-            github
+            github ↗
           </a>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function StatusStrip(): JSX.Element {
+  return (
+    <div className="border-b border-edge bg-canvas-inset">
+      <div className="mx-auto max-w-6xl flex flex-wrap items-center justify-between gap-3 px-6 py-1.5 font-mono text-2xs uppercase tracking-widest text-ink-500">
+        <span className="flex items-center gap-2">
+          <span className="live-dot" />
+          <span className="text-ink-300">live</span>
+          <span className="hidden sm:inline">· redis · streams · pub/sub</span>
+        </span>
+        <span className="hidden md:inline">
+          ≤ 500 tok feature card · ≤ 1500 tok resume packet
+        </span>
+      </div>
     </div>
   );
 }
@@ -51,10 +69,8 @@ function NavItem({ to, end, children }: NavItemProps): JSX.Element {
       to={to}
       end={end ?? false}
       className={({ isActive }) =>
-        `px-3 py-1.5 text-sm rounded-md transition ${
-          isActive
-            ? "bg-ink-100 text-ink-900"
-            : "text-ink-500 hover:text-ink-900"
+        `px-2.5 py-1 font-mono text-2xs uppercase tracking-widest transition ${
+          isActive ? "text-signal" : "text-ink-300 hover:text-ink-50"
         }`
       }
     >

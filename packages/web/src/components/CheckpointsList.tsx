@@ -47,36 +47,55 @@ export function CheckpointsList({
 
   return (
     <section className="card">
-      <header className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Checkpoints</h3>
-        <span className="text-xs font-mono text-ink-500">
-          {items === null ? "" : `${items.length}`}
+      <header className="flex items-center justify-between mb-4 pb-3 border-b border-edge">
+        <div>
+          <p className="font-mono text-2xs uppercase tracking-widest text-signal">
+            checkpoints
+          </p>
+          <p className="mt-0.5 text-xs text-ink-500">
+            session-pause snapshots · ttl 7d
+          </p>
+        </div>
+        <span className="pill-bordered">
+          {items === null ? "—" : `${items.length}`}
         </span>
       </header>
 
       {error !== null ? (
-        <p className="text-sm text-rose-700">Failed: {error}</p>
+        <p className="font-mono text-xs text-evt-error">↳ failed: {error}</p>
       ) : items === null ? (
-        <p className="text-sm text-ink-500">Loading…</p>
+        <p className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+          loading…
+        </p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-ink-500">
-          No checkpoints for this feature. Run write_checkpoint to create one.
+        <p className="text-sm text-ink-500 italic">
+          no checkpoints — run write_checkpoint to create one
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {items.map((c) => (
-            <li key={c.checkpoint_id} className="border-l-2 border-ink-200 pl-3">
-              <p className="font-mono text-[11px] text-ink-500">
-                {c.checkpoint_id} · session {c.session_id} ·{" "}
+            <li
+              key={c.checkpoint_id}
+              className="border-l-2 border-signal/60 pl-3"
+            >
+              <p className="font-mono text-2xs uppercase tracking-widest text-ink-500">
+                {c.checkpoint_id} · sess {c.session_id} ·{" "}
                 <span title={formatDate(c.ts)}>{relativeTime(c.ts)}</span>
               </p>
-              <p className="mt-1 text-sm text-ink-900">
-                next: {c.next_action || "—"}
+              <p className="mt-1 text-sm text-ink-50">
+                {c.next_action || (
+                  <span className="text-ink-500 italic">no next action</span>
+                )}
               </p>
               {c.blockers.length > 0 ? (
-                <ul className="mt-1 list-disc pl-5 text-sm text-ink-700">
+                <ul className="mt-2 space-y-0.5 text-sm text-ink-100">
                   {c.blockers.map((b, i) => (
-                    <li key={i}>{b}</li>
+                    <li key={i} className="flex gap-2">
+                      <span className="text-evt-error font-mono select-none">
+                        ●
+                      </span>
+                      <span>{b}</span>
+                    </li>
                   ))}
                 </ul>
               ) : null}
