@@ -7,12 +7,15 @@
  *
  * Normalization steps (idempotent):
  *   1. Lowercase
- *   2. Replace [/, ., -, whitespace] with `_`
+ *   2. Replace [forward-slash, backslash, ., -, whitespace] with `_`
  *   3. Collapse repeated underscores
  *   4. Trim leading/trailing underscores
+ *
+ * Backslash is folded to `_` for symmetry with Windows-style paths that
+ * git occasionally yields in edge cases.
  */
 
-const SEPARATOR_RE = /[\\/.\-\s]+/g;
+const SEPARATOR_RE = /[/\\.\-\s]+/g;
 const REPEATED_UNDERSCORE_RE = /_{2,}/g;
 const TRIM_UNDERSCORE_RE = /^_+|_+$/g;
 

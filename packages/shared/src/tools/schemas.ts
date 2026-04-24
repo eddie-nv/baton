@@ -98,6 +98,12 @@ export const appendEventOutput = z.object({
 });
 
 // write_checkpoint -------------------------------------------------------
+// Note: `blockers` here is a point-in-time snapshot supplied by the caller
+// at session-pause time. It is NOT the same field as `open_blockers` on
+// the feature card — the card tracks current-state open blockers; the
+// checkpoint records what the caller saw as blocking when they paused.
+// A compactor handler for session.pause MAY merge these, but the schema
+// keeps them distinct.
 export const writeCheckpointInputShape = {
   room_id: z.string().min(1),
   feature_id: z.string().min(1),

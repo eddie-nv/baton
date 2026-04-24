@@ -58,4 +58,18 @@ describe("truncatePacket", () => {
     truncatePacket(src);
     expect(src).toEqual(snapshot);
   });
+
+  it("throws when card base fields alone exceed the packet budget", () => {
+    const bloated = {
+      ...minimalPacket(),
+      last_decisions: [],
+      feature_card: {
+        ...minimalPacket().feature_card,
+        purpose: "x ".repeat(1800), // forces packet > 1500 by itself
+        failed_attempts: [],
+        hypotheses: [],
+      },
+    };
+    expect(() => truncatePacket(bloated)).toThrow(/cannot be truncated/);
+  });
 });

@@ -13,7 +13,10 @@ export const PACKET_BUDGET = 1500;
  *   2. Drop oldest `hypotheses` (index 0) one at a time.
  *
  * Never mutates `card`. If already under budget, returns the input
- * reference unchanged.
+ * reference unchanged. Throws if the card's fixed fields (purpose, git,
+ * surface, invariants, etc.) alone exceed the budget — the backend's
+ * JSON.SET boundary in util/tokens.ts relies on this to fail loudly
+ * rather than persist an oversized card.
  */
 export function truncateCard(card: FeatureCard, budget: number = CARD_BUDGET): FeatureCard {
   if (countTokens(card) <= budget) return card;
@@ -32,6 +35,13 @@ export function truncateCard(card: FeatureCard, budget: number = CARD_BUDGET): F
       ...working,
       hypotheses: working.hypotheses.slice(1),
     };
+  }
+
+  const final = countTokens(working);
+  if (final > budget) {
+    throw new Error(
+      `FeatureCard cannot be truncated under ${budget} tokens (got ${final}); fixed fields exceed budget`,
+    );
   }
 
   return working;
@@ -72,6 +82,13 @@ export function truncatePacket(packet: ResumePacket, budget: number = PACKET_BUD
         failed_attempts: working.feature_card.failed_attempts.slice(1),
       },
     };
+  }
+
+  const final = countTokens(working);
+  if (final > budget) {
+    throw new Error(
+      `ResumePacket cannot be truncated under ${budget} tokens (got ${final}); card base fields exceed budget`,
+    );
   }
 
   return working;

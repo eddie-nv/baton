@@ -65,6 +65,16 @@ describe("truncateCard", () => {
     expect(src).toEqual(snapshot);
   });
 
+  it("throws when fixed fields alone exceed the budget", () => {
+    const bloated = {
+      ...minimalCard(),
+      failed_attempts: [],
+      hypotheses: [],
+      purpose: "x ".repeat(600), // ~600 tokens of purpose alone
+    };
+    expect(() => truncateCard(bloated)).toThrow(/cannot be truncated/);
+  });
+
   it("drops hypotheses when failed_attempts alone cannot bring the card under budget", () => {
     // Long hypotheses + no failed_attempts → forces the hypotheses loop.
     const hypothesesHeavy = {
