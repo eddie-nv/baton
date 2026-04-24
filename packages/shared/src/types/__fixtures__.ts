@@ -84,10 +84,11 @@ export function maximalCard(): FeatureCard {
 }
 
 export function overBudgetCard(): FeatureCard {
-  const many: FailedAttempt[] = Array.from({ length: 30 }, (_, i) => ({
+  const many: FailedAttempt[] = Array.from({ length: 60 }, (_, i) => ({
     signature: `attempt_${i}`,
-    summary: "a previously tried fix that did not work for various detailed reasons",
-    event_ids: [`evt_${i * 2}`, `evt_${i * 2 + 1}`],
+    summary:
+      "a previously tried fix that did not work for various detailed reasons involving middleware ordering and cache key granularity",
+    event_ids: [`evt_${i * 2}`, `evt_${i * 2 + 1}`, `evt_${i * 3}`],
   }));
   return {
     ...maximalCard(),

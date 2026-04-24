@@ -5,5 +5,8 @@ dist/
 .env.local
 .DS_Store
 
+# Test coverage
+coverage/
+
 # Redis data volume
 deploy/data/

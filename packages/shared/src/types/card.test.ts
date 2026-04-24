@@ -64,4 +64,19 @@ describe("truncateCard", () => {
     truncateCard(src);
     expect(src).toEqual(snapshot);
   });
+
+  it("drops hypotheses when failed_attempts alone cannot bring the card under budget", () => {
+    // Long hypotheses + no failed_attempts → forces the hypotheses loop.
+    const hypothesesHeavy = {
+      ...minimalCard(),
+      failed_attempts: [],
+      hypotheses: Array.from({ length: 3 }, (_, i) =>
+        `hypothesis_${i}: ${"a very detailed speculative root-cause analysis ".repeat(30)}`,
+      ),
+    };
+    expect(countTokens(hypothesesHeavy)).toBeGreaterThan(CARD_BUDGET);
+    const out = truncateCard(hypothesesHeavy);
+    expect(countTokens(out)).toBeLessThanOrEqual(CARD_BUDGET);
+    expect(out.hypotheses.length).toBeLessThan(hypothesesHeavy.hypotheses.length);
+  });
 });
