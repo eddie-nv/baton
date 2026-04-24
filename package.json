@@ -11,7 +11,8 @@
     "clean": "tsc -b --clean packages/shared packages/backend packages/mcp-shim && rm -rf packages/*/dist",
     "test": "npm run test --workspaces --if-present",
     "dev:backend": "npm run dev --workspace @baton/backend",
-    "verify": "tsx scripts/verify.ts"
+    "verify": "tsx scripts/verify.ts",
+    "verify:shim": "tsx scripts/verify-shim.ts"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
