@@ -21,3 +21,17 @@ export function truncate(s: string, max: number = 80): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max - 1)}…`;
 }
+
+/**
+ * Cheap, browser-friendly token estimate. Real Baton token counts are
+ * enforced server-side by js-tiktoken at the JSON.SET boundary; this
+ * approximation is only for visual display so the UI bundle doesn't
+ * have to ship the BPE tokenizer (multi-MB of tables) to every page.
+ *
+ * The 4-chars-per-token heuristic is OpenAI's published rule of thumb
+ * for English text and tracks tiktoken closely enough for a badge.
+ */
+export function approximateTokens(value: unknown): number {
+  const text = typeof value === "string" ? value : JSON.stringify(value);
+  return Math.ceil(text.length / 4);
+}

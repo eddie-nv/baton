@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ApiError,
   getRoom,
@@ -8,6 +8,11 @@ import {
 } from "../lib/api.js";
 import type { FeatureCard } from "@baton/shared";
 import { EmptyState } from "../components/EmptyState.js";
+import { FeatureList } from "../components/FeatureList.js";
+import { FeatureCardView } from "../components/FeatureCardView.js";
+import { ResumePacketView } from "../components/ResumePacketView.js";
+import { EventTimeline } from "../components/EventTimeline.js";
+import { CheckpointsList } from "../components/CheckpointsList.js";
 import { formatDate, relativeTime } from "../lib/format.js";
 
 type Status =
@@ -18,18 +23,19 @@ type Status =
 export function RoomDetail(): JSX.Element {
   const params = useParams<{ roomId: string }>();
   const roomId = params.roomId ?? "";
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<Status>({ kind: "loading" });
 
   useEffect(() => {
     let cancelled = false;
+    setStatus({ kind: "loading" });
     Promise.all([getRoom(roomId), listFeatures(roomId)])
       .then(([roomRes, featuresRes]) => {
         if (cancelled) return;
-        setStatus({
-          kind: "ok",
-          room: roomRes.room,
-          features: featuresRes.features,
-        });
+        const features = [...featuresRes.features].sort((a, b) =>
+          a.feature_id.localeCompare(b.feature_id),
+        );
+        setStatus({ kind: "ok", room: roomRes.room, features });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -38,13 +44,34 @@ export function RoomDetail(): JSX.Element {
             ? `${err.code}: ${err.message}`
             : err instanceof Error
               ? err.message
-              : "unknown error";
+              : "unknown";
         setStatus({ kind: "error", message });
       });
     return () => {
       cancelled = true;
     };
   }, [roomId]);
+
+  const features = status.kind === "ok" ? status.features : [];
+  const requestedFeatureId = searchParams.get("feature");
+
+  const selectedFeature = useMemo<FeatureCard | null>(() => {
+    if (features.length === 0) return null;
+    if (requestedFeatureId !== null) {
+      const match = features.find((f) => f.feature_id === requestedFeatureId);
+      if (match !== undefined) return match;
+    }
+    return features[0] ?? null;
+  }, [features, requestedFeatureId]);
+
+  // Sync URL with default selection so deep-links + back button work.
+  useEffect(() => {
+    if (requestedFeatureId === null && selectedFeature !== null) {
+      const next = new URLSearchParams(searchParams);
+      next.set("feature", selectedFeature.feature_id);
+      setSearchParams(next, { replace: true });
+    }
+  }, [requestedFeatureId, selectedFeature, searchParams, setSearchParams]);
 
   if (status.kind === "loading") {
     return (
@@ -66,7 +93,7 @@ export function RoomDetail(): JSX.Element {
     );
   }
 
-  const { room, features } = status;
+  const { room } = status;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 space-y-6">
@@ -89,32 +116,47 @@ export function RoomDetail(): JSX.Element {
         </dl>
       </header>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Features</h2>
-        {features.length === 0 ? (
-          <EmptyState
-            title="No features yet"
-            description="A feature exists once you fire an event for it (e.g. action.branch)."
-          />
-        ) : (
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {features.map((f) => (
-              <li key={f.feature_id} className="card">
-                <p className="font-mono text-sm text-ink-900">{f.feature_id}</p>
-                <p className="mt-1 text-xs text-ink-500">
-                  {f.git.branch || "(no branch yet)"} · state: {f.state}
-                </p>
-                <p className="mt-2 text-sm text-ink-700">
-                  {f.purpose || <span className="text-ink-500">(no purpose set)</span>}
-                </p>
-                <p className="mt-3 text-xs text-ink-500">
-                  Phase 4 will add the events timeline + resume packet view here.
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {features.length === 0 ? (
+        <EmptyState
+          title="No features yet"
+          description="A feature exists once you fire an event for it (e.g. action.branch)."
+        />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          <aside>
+            <h2 className="text-xs uppercase tracking-wide text-ink-500 mb-2">
+              Features
+            </h2>
+            <FeatureList
+              features={features}
+              selectedFeatureId={selectedFeature?.feature_id ?? null}
+              onSelect={(featureId) => {
+                const next = new URLSearchParams(searchParams);
+                next.set("feature", featureId);
+                setSearchParams(next, { replace: false });
+              }}
+            />
+          </aside>
+
+          {selectedFeature !== null ? (
+            <div className="space-y-6 min-w-0">
+              <FeatureCardView card={selectedFeature} />
+              <ResumePacketView
+                roomId={room.room_id}
+                featureId={selectedFeature.feature_id}
+              />
+              <CheckpointsList
+                roomId={room.room_id}
+                featureId={selectedFeature.feature_id}
+              />
+              <EventTimeline
+                roomId={room.room_id}
+                featureId={selectedFeature.feature_id}
+              />
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
