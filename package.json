@@ -17,7 +17,8 @@
     "dev:backend": "npm run dev --workspace @baton/backend",
     "verify": "tsx scripts/verify.ts",
     "verify:shim": "tsx scripts/verify-shim.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "seed:baton": "tsx scripts/seed-baton.ts"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
