@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "baton": {
+      "command": "npx",
+      "args": ["baton-mcp"],
+      "env": {
+        "BATON_API_URL": "http://localhost:3000",
+        "BATON_ROOM_ID": "",
+        "BATON_ACTOR_ID": "you@cursor",
+        "BATON_FEATURE_ID": ""
+      }
+    }
+  }
+}

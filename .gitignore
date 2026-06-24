@@ -1,0 +1,18 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store
+
+# Test coverage
+coverage/
+
+# Redis data volume
+deploy/data/
+
+# Vite build output (Vite drops it into packages/backend/public)
+packages/backend/public/
+
+# Local Claude Code config (agents, rules, settings) — not part of the OSS release
+.claude/
