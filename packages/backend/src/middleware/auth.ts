@@ -1,4 +1,3 @@
-import type { Context, MiddlewareHandler, Next } from "hono";
 import type { BatonRedis } from "../redis/client.js";
 import { k } from "../redis/keys.js";
 
@@ -28,26 +27,4 @@ export async function authenticateRoom(
     return { ok: false, message: "Unknown room_id" };
   }
   return { ok: true, roomId };
-}
-
-/**
- * Bearer-room authentication middleware. Thin wrapper around
- * authenticateRoom — verifies and sets `roomId` on context, otherwise
- * returns 401 with the standard error envelope.
- *
- * Post-hackathon this is swapped for per-user tokens (see CLAUDE.md §1).
- */
-export function createRoomAuth(redis: BatonRedis): MiddlewareHandler {
-  return async (c: Context, next: Next) => {
-    const result = await authenticateRoom(redis, c.req.header("Authorization"));
-    if (!result.ok) {
-      return c.json(
-        { error: { code: "unauthorized", message: result.message } },
-        401,
-      );
-    }
-    c.set("roomId", result.roomId);
-    await next();
-    return undefined;
-  };
 }

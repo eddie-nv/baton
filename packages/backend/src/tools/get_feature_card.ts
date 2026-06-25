@@ -1,9 +1,5 @@
 import type { z } from "zod";
-import {
-  getFeatureCardInput,
-  featureCardSchema,
-  type FeatureCard,
-} from "@baton/shared";
+import { getFeatureCardInput, type FeatureCard } from "@baton/shared";
 import { k } from "../redis/keys.js";
 import { notFound, type ToolHandler } from "./types.js";
 
@@ -21,14 +17,5 @@ export const getFeatureCard: ToolHandler<Input, Output> = async (
 ) => {
   const raw = await redis.json.get(k.feature(room_id, feature_id));
   if (raw === null) throw notFound(`feature ${feature_id}`);
-
-  // Defensive parse — should always succeed for data we wrote, but
-  // guards against schema drift across deployments.
-  const parsed = featureCardSchema.safeParse(raw);
-  if (!parsed.success) {
-    throw new Error(
-      `feature ${feature_id} in ${room_id} failed schema validation: ${parsed.error.message}`,
-    );
-  }
-  return parsed.data;
+  return raw as unknown as FeatureCard;
 };
