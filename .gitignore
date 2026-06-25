@@ -16,3 +16,6 @@ packages/backend/public/
 
 # Local Claude Code config (agents, rules, settings) — not part of the OSS release
 .claude/
+
+# Local research / scratch notes — not part of the OSS release
+research/
