@@ -5,6 +5,7 @@ import {
   type FeatureCard,
   type ResumePacket,
 } from "@baton/shared";
+import { uniqueAppend } from "../compactor/rules.js";
 import { k } from "../redis/keys.js";
 import { loadRecentDecisions } from "../redis/queries.js";
 import { notFound, type ToolHandler } from "./types.js";
@@ -58,7 +59,7 @@ export const getResumePacket: ToolHandler<Input, Output> = async (
     last_decisions,
     open_blockers:
       checkpoint !== null
-        ? mergeBlockers(card.open_blockers, checkpoint.blockers)
+        ? uniqueAppend(checkpoint.blockers, card.open_blockers)
         : card.open_blockers,
     next_action:
       checkpoint !== null && checkpoint.next_action !== ""
@@ -68,18 +69,3 @@ export const getResumePacket: ToolHandler<Input, Output> = async (
 
   return truncatePacket(packet);
 };
-
-function mergeBlockers(
-  fromCard: readonly string[],
-  fromCheckpoint: readonly string[],
-): string[] {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const b of [...fromCheckpoint, ...fromCard]) {
-    if (!seen.has(b)) {
-      seen.add(b);
-      out.push(b);
-    }
-  }
-  return out;
-}

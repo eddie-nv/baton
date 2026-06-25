@@ -73,25 +73,23 @@ export const resumePacketSchema = z.object({
 // validation and type inference.
 
 // create_room ------------------------------------------------------------
-export const createRoomInputShape = {
+export const createRoomInput = z.object({
   project_id: z.string().optional(),
   title: z.string().min(1),
-};
-export const createRoomInput = z.object(createRoomInputShape);
+});
 export const createRoomOutput = z.object({
   room_id: z.string(),
   project_id: z.string(),
 });
 
 // append_event -----------------------------------------------------------
-export const appendEventInputShape = {
+export const appendEventInput = z.object({
   room_id: z.string().min(1),
   feature_id: z.string().min(1),
   type: eventTypeSchema,
   payload: z.record(z.unknown()),
   actor_id: z.string().min(1),
-};
-export const appendEventInput = z.object(appendEventInputShape);
+});
 export const appendEventOutput = z.object({
   event_id: z.string(),
   card_updated: z.boolean(),
@@ -104,70 +102,62 @@ export const appendEventOutput = z.object({
 // checkpoint records what the caller saw as blocking when they paused.
 // A compactor handler for session.pause MAY merge these, but the schema
 // keeps them distinct.
-export const writeCheckpointInputShape = {
+export const writeCheckpointInput = z.object({
   room_id: z.string().min(1),
   feature_id: z.string().min(1),
   session_id: z.string().min(1),
   next_action: z.string(),
   blockers: z.array(z.string()),
-};
-export const writeCheckpointInput = z.object(writeCheckpointInputShape);
+});
 export const writeCheckpointOutput = z.object({
   checkpoint_id: z.string(),
   expires_at: z.number().int().nonnegative(),
 });
 
 // get_feature_card -------------------------------------------------------
-export const getFeatureCardInputShape = {
+export const getFeatureCardInput = z.object({
   room_id: z.string().min(1),
   feature_id: z.string().min(1),
-};
-export const getFeatureCardInput = z.object(getFeatureCardInputShape);
-export const getFeatureCardOutput = featureCardSchema;
+});
 
 // get_resume_packet ------------------------------------------------------
-export const getResumePacketInputShape = {
+export const getResumePacketInput = z.object({
   room_id: z.string().min(1),
   feature_id: z.string().min(1),
   session_id: z.string().optional(),
-};
-export const getResumePacketInput = z.object(getResumePacketInputShape);
-export const getResumePacketOutput = resumePacketSchema;
+});
 
 // ─────────────────────────────────────────────────────────────
-// Tool name → { inputShape, outputSchema } map for the backend dispatcher
-// and the MCP shim to iterate over.
+// Tool name → { inputShape, input, requiresAuth } map for the backend
+// dispatcher and the MCP shim to iterate over. `inputShape` is the raw
+// `{ [key]: ZodSchema }` form the MCP SDK's registerTool expects, derived
+// from each z.object via `.shape` so the shape is declared exactly once.
 // ─────────────────────────────────────────────────────────────
 
 export const toolSchemas = {
   create_room: {
-    inputShape: createRoomInputShape,
+    inputShape: createRoomInput.shape,
     input: createRoomInput,
-    output: createRoomOutput,
     requiresAuth: false,
   },
   append_event: {
-    inputShape: appendEventInputShape,
+    inputShape: appendEventInput.shape,
     input: appendEventInput,
-    output: appendEventOutput,
     requiresAuth: true,
   },
   write_checkpoint: {
-    inputShape: writeCheckpointInputShape,
+    inputShape: writeCheckpointInput.shape,
     input: writeCheckpointInput,
-    output: writeCheckpointOutput,
     requiresAuth: true,
   },
   get_feature_card: {
-    inputShape: getFeatureCardInputShape,
+    inputShape: getFeatureCardInput.shape,
     input: getFeatureCardInput,
-    output: getFeatureCardOutput,
     requiresAuth: true,
   },
   get_resume_packet: {
-    inputShape: getResumePacketInputShape,
+    inputShape: getResumePacketInput.shape,
     input: getResumePacketInput,
-    output: getResumePacketOutput,
     requiresAuth: true,
   },
 } as const;
